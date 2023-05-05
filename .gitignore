@@ -13,3 +13,4 @@ restart.py
 test*
 tryGet.py
 *.csv
+__pycache*
