@@ -1,0 +1,15 @@
+*.txt
+*.sh
+BENCH.py
+generateWallet.py
+main.py
+MEGA_BENCH_ENDPOINT.py
+memTest.py
+multithreading_with_file_slow.py
+OPTIMIZATION.md
+*.c
+restart.py
+*.bat
+test*
+tryGet.py
+*.csv
