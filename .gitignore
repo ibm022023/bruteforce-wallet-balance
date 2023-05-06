@@ -1,5 +1,6 @@
 .gitignore
-*.txt
+address.txt
+multiaddress_call.txt
 *.sh
 BENCH.py
 generateWallet.py
