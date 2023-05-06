@@ -25,7 +25,7 @@ MULTIPLE_ADDRESS_ENDPOINT = {
 }
 
 
-def parse_url(endpoint: str, addressList: list[str]) -> str:
+def parse_url(endpoint: str, addressList):
     first = True
     for i, address in enumerate(addressList):
         if first:
@@ -37,7 +37,7 @@ def parse_url(endpoint: str, addressList: list[str]) -> str:
 
 
 def get_balance(
-    provider: str, addressList: list[str], recursive=False) -> list[int]:
+    provider: str, addressList: list[str], recursive=False):
     endpoint=MULTIPLE_ADDRESS_ENDPOINT.get(provider)[0]
     endpointUrl = parse_url(endpoint, addressList)
     try:
@@ -64,7 +64,7 @@ def get_balance(
         return [-1 for _ in range(len(addressList))]
 
 
-def switch(provider: str, json, addressList: list[str]) -> list[int]:
+def switch(provider: str, json, addressList):
     """
     Given the endfpoint provider, the json response, and the addresses, it try to find the balance of each address in the json response
     @return the balance
@@ -162,8 +162,8 @@ while True:
     print("Elapsed " + str(int(partial - start)) + " seconds from start")
     print("Mean address checked in one second: " + str(count / (partial - start)))
     print("Current memory usage:",str(round(tracemalloc.get_traced_memory()[0]/1024/1024)))
-    if tracemalloc.get_traced_memory()[0]>2000*1024*1024:
-        print("Memory usage exceeded 1000MB")
+    if tracemalloc.get_traced_memory()[0]>350*1024*1024:
+        print("Memory usage exceeded 350MB")
         restart()
     time.sleep(60)
 
