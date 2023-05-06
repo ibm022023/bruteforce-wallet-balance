@@ -65,7 +65,7 @@ def getRandomSeedList(withSize=False):
     return seed_string_final
 
 
-def getRandomSeedListWithSize(size) -> list[str]:
+def getRandomSeedListWithSize(size):
     result=[]
     for i in range(size):
         if len(result)==size: #the list is complete
@@ -76,7 +76,7 @@ def getRandomSeedListWithSize(size) -> list[str]:
         result.append(getRandomSeedList(True)[0])
     return result
 
-def getRandomSeedListWithSizeNaive(size) -> list[str]:
+def getRandomSeedListWithSizeNaive(size):
     result=[]
     for i in range(size):
         if len(result)==size: #the list is complete
