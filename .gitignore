@@ -1,5 +1,8 @@
 .gitignore
+.*
+*.json
 address.txt
+requirements.txt
 multiaddress_call.txt
 *.sh
 BENCH.py

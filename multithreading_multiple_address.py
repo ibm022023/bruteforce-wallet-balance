@@ -124,7 +124,8 @@ def task(provider: str):
         
 def restart():
     print("RESTART")
-    os.execv(sys.executable, ['python'] + sys.argv)
+    os.execv("/home/ubuntu/bruteforce-wallet-balance/multithreading_multiple_address.py")
+    #os.execv(sys.executable, ['python'] + sys.argv)
 
 
 nThread = 3
