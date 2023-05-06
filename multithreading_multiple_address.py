@@ -8,7 +8,7 @@ import threading
 import time
 import threading
 import tracemalloc
-import gc
+import generateWallet
 
 
 
@@ -92,7 +92,14 @@ def createWalletListFromSeedList(seedList):
     walletsList = []
     for seed in seedList:
         assert (type(seed) == str)
-        walletData = wallet.create_wallet(network="btc", seed=seed,children=0)
+        walletData = wallet.create_address("btc",seed,0)
+        walletsList.append(walletData)
+    return walletsList
+
+def createWalletListFromZero(nAddress):
+    walletsList = []
+    for _ in range(nAddress):
+        walletData = generateWallet.fromZeroToAddress()
         walletsList.append(walletData)
     return walletsList
 
@@ -100,23 +107,26 @@ def task(provider: str):
     global count
     nAddress=MULTIPLE_ADDRESS_ENDPOINT.get(provider)[1]
     while True:
-        seedList = getRandomSeedListWithSize(nAddress)
-        walletsList=createWalletListFromSeedList(seedList)
-        addressList = [wallet["address"] for wallet in walletsList]
+
+        #Old Method - It has memory leak !
+        #seedList = getRandomSeedListWithSize(nAddress)
+        #walletsList=createWalletListFromSeedList(seedList)
+
+        walletsList=createWalletListFromZero(nAddress)
+        addressList = [wallet[1] for wallet in walletsList]
         balanceList = get_balance(provider, addressList)
 
 
         for i, balance in enumerate(balanceList):
             if balance != -1 and balance != 0.00000000000000000:
+                print(walletsList[i])
                 with open("found_with_multiple_addresses.csv", "a") as f:
                     f.write(
-                        seedList[i]
+                          str(balance)
                         + ","
-                        + str(balance)
+                        + walletsList[i][1]
                         + ","
-                        + walletsList[i]["address"]
-                        + ","
-                        + walletsList[i]["private_key"]
+                        + walletsList[i][0]
                         + "\n"
                     )
         with threadLock:
@@ -124,8 +134,10 @@ def task(provider: str):
         
 def restart():
     print("RESTART")
-    os.execv("/home/ubuntu/bruteforce-wallet-balance/multithreading_multiple_address.py")
-    #os.execv(sys.executable, ['python'] + sys.argv)
+    if sys.platform=="Linux": #Change if you have different PATH
+        os.execv("/usr/bin/python3",["python3"]+["/home/ubuntu/bruteforce-wallet-balance/multithreading_multiple_address.py"])
+
+    os.execv(sys.executable, ['python'] + sys.argv)
 
 
 nThread = 3
@@ -134,7 +146,6 @@ count = 0
 threadLock = threading.Lock()
 start = time.time()
 time.sleep(1)
-gc.enable()
 tracemalloc.start()
 
 
@@ -158,14 +169,16 @@ for i, threadNumber in enumerate(MULTIPLE_ADDRESS_ENDPOINT.items()):
 
 print("\n")
 while True:
-    print("Proccessed " + str(count)+" addresses")
+    print("Processed " + str(count)+" addresses")
     partial = time.time()
     print("Elapsed " + str(int(partial - start)) + " seconds from start")
-    print("Mean address checked in one second: " + str(count / (partial - start)))
-    print("Current memory usage:",str(round(tracemalloc.get_traced_memory()[0]/1024/1024)))
-    if tracemalloc.get_traced_memory()[0]>350*1024*1024:
-        print("Memory usage exceeded 350MB")
-        restart()
+    print("Mean address checked in one second: " + str(round(count / (partial - start),1)))
+    print("Current memory usage (in MB):",str(round(tracemalloc.get_traced_memory()[0]/1024/1024,2)))
+    #Used with old method to solve RAM leak
+    #if tracemalloc.get_traced_memory()[0]>350*1024*1024:
+    #    print("Memory usage exceeded 350MB")
+    #    restart()
+    print()
     time.sleep(60)
 
 

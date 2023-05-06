@@ -6,8 +6,9 @@ requirements.txt
 multiaddress_call.txt
 *.sh
 BENCH.py
-generateWallet.py
-main.py
+addressToFile.py
+check_plus_monitor.py
+main.py*
 MEGA_BENCH_ENDPOINT.py
 memTest.py
 multithreading_with_file_slow.py
@@ -18,4 +19,6 @@ restart.py
 test*
 tryGet.py
 *.csv
-__pycache*
+__pycache__*
+blockonomics*
+.vscode
