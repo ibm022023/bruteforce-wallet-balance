@@ -37,7 +37,7 @@ def parse_url(endpoint: str, addressList):
 
 
 def get_balance(
-    provider: str, addressList: list[str], recursive=False):
+    provider: str, addressList, recursive=False):
     endpoint=MULTIPLE_ADDRESS_ENDPOINT.get(provider)[0]
     endpointUrl = parse_url(endpoint, addressList)
     try:
