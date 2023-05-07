@@ -1,7 +1,5 @@
 import os
 import sys
-from pywallet import wallet
-from seed_create import getRandomSeedListWithSize
 from requests import get
 import certifi
 import threading
@@ -49,10 +47,10 @@ def get_balance(
                 + " from "
                 + provider
             )
-            time.sleep(10)
+            time.sleep(5)
             if not recursive:
                 print("Recursive with " + provider)
-                return get_balance(provider, endpoint, addressList, True)
+                return get_balance(provider, addressList, True)
             return [-1 for _ in range(len(addressList))]
 
         response = response.json()
@@ -71,8 +69,8 @@ def switch(provider: str, json, addressList):
     """
     balance = []
     assert(len(json) == MULTIPLE_ADDRESS_ENDPOINT.get(provider)[1])
-    if provider == "haskoin":
-        for i in range(len(json)): 
+    if provider == "api.haskoin.com":
+        for i in range(len(json)):
             balance.append(json[i]["confirmed"])
 
     elif provider == "api-r.bitcoinchain.com":
@@ -82,24 +80,19 @@ def switch(provider: str, json, addressList):
             except:
                 balance.append(0)
 
-    elif provider == "blockchain.info4":
+    elif provider == "blockchain.info":
         for i in range(len(json)):
             balance.append(json[addressList[i]]["final_balance"])
 
     return balance
 
-def createWalletListFromSeedList(seedList):
-    walletsList = []
-    for seed in seedList:
-        assert (type(seed) == str)
-        walletData = wallet.create_address("btc",seed,0)
-        walletsList.append(walletData)
-    return walletsList
-
 def createWalletListFromZero(nAddress):
     walletsList = []
     for _ in range(nAddress):
         walletData = generateWallet.fromZeroToAddress()
+        if type(walletData[1])==bytes:
+            walletData[1]=walletData[1].decode()
+        #[0]: private_key ; [1]: public address
         walletsList.append(walletData)
     return walletsList
 
@@ -107,15 +100,10 @@ def task(provider: str):
     global count
     nAddress=MULTIPLE_ADDRESS_ENDPOINT.get(provider)[1]
     while True:
-
-        #Old Method - It has memory leak !
-        #seedList = getRandomSeedListWithSize(nAddress)
-        #walletsList=createWalletListFromSeedList(seedList)
-
+        
         walletsList=createWalletListFromZero(nAddress)
         addressList = [wallet[1] for wallet in walletsList]
         balanceList = get_balance(provider, addressList)
-
 
         for i, balance in enumerate(balanceList):
             if balance != -1 and balance != 0.00000000000000000:
