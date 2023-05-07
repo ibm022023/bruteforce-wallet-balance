@@ -2,8 +2,8 @@ import binascii
 from hashlib import sha256
 import itertools
 import random
-import sys
 
+#-----------------------------DEPRECATED------------------------------
 
 def getRandomSeedList(withSize=False):
     g=open("./wordlist_BIP39.txt","r")

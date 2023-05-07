@@ -68,23 +68,30 @@ def switch(provider: str, json, addressList):
     @return the balance
     """
     balance = []
+    found=False
     assert(len(json) == MULTIPLE_ADDRESS_ENDPOINT.get(provider)[1])
     if provider == "api.haskoin.com":
         for i in range(len(json)):
             balance.append(json[i]["confirmed"])
+            if json[i]["confirmed"]>0:
+                found=True
 
     elif provider == "api-r.bitcoinchain.com":
         for i in range(len(json)):
             try:
                 balance.append(json[i]["balance"])
+                if json[i]["balance"]>0:
+                    found=True
             except:
                 balance.append(0)
 
     elif provider == "blockchain.info":
         for i in range(len(json)):
             balance.append(json[addressList[i]]["final_balance"])
+            if json[addressList[i]]["final_balance"]>0:
+                found=True
 
-    return balance
+    return [balance,found]
 
 def createWalletListFromZero(nAddress):
     walletsList = []
@@ -105,18 +112,19 @@ def task(provider: str):
         addressList = [wallet[1] for wallet in walletsList]
         balanceList = get_balance(provider, addressList)
 
-        for i, balance in enumerate(balanceList):
-            if balance != -1 and balance != 0.00000000000000000:
-                print(walletsList[i])
-                with open("found_with_multiple_addresses.csv", "a") as f:
-                    f.write(
-                          str(balance)
-                        + ","
-                        + walletsList[i][1]
-                        + ","
-                        + walletsList[i][0]
-                        + "\n"
-                    )
+        if balanceList[1]:
+            for i, balance in enumerate(balanceList[0]):
+                if balance != -1 and balance != 0.00000000000000000:
+                    print(walletsList[i])
+                    with open("found_with_multiple_addresses.csv", "a") as f:
+                        f.write(
+                              str(balance)
+                            + ","
+                            + walletsList[i][1]
+                            + ","
+                            + walletsList[i][0]
+                            + "\n"
+                        )
         with threadLock:
             count += nAddress
         
