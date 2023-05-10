@@ -1,12 +1,10 @@
 .gitignore
-.*
 *.json
-address.txt
-requirements.txt
-multiaddress_call.txt
+*.txt
 *.sh
 BENCH.py
 addressToFile.py
+seed_create.py
 check_plus_monitor.py
 main.py*
 MEGA_BENCH_ENDPOINT.py
@@ -22,3 +20,4 @@ tryGet.py
 __pycache__*
 blockonomics*
 .vscode
+.*

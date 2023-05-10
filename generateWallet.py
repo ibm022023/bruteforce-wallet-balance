@@ -5,6 +5,8 @@ import ecdsa
 
 
 def fromZeroToAddress():
+    """
+    It create a pair (private_key, pubblic address)"""
     ecdsaPrivateKey = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1)
     ecdsaPublicKey = '04' +  ecdsaPrivateKey.get_verifying_key().to_string().hex()
     hash256FromECDSAPublicKey = hashlib.sha256(binascii.unhexlify   (ecdsaPublicKey)).hexdigest()
