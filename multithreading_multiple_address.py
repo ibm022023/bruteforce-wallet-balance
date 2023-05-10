@@ -24,6 +24,11 @@ MULTIPLE_ADDRESS_ENDPOINT = {
 
 
 def parse_url(endpoint: str, addressList):
+    """
+    This, composes the url for the request to the endpoint.
+    With given endpoint (prefix), it append the all the addresses in addressList.
+    @return the endpoint well formed
+    """
     first = True
     for i, address in enumerate(addressList):
         if first:
@@ -36,6 +41,11 @@ def parse_url(endpoint: str, addressList):
 
 def get_balance(
     provider: str, addressList, recursive=False):
+    """
+    Given the provider (see MULTIPLE_ADDRESS_ENDPOINT to check the available provider), a list of wallet addresses, check the balance of all provided addresses.
+    The parameter recursive is used to make another requests if the first return status code different from 200.
+    @return a list with: first position the list of all the balance found (or -1 if not found); second position a bool to verify if inside the previous list there are positive balance. 
+    """
     endpoint=MULTIPLE_ADDRESS_ENDPOINT.get(provider)[0]
     endpointUrl = parse_url(endpoint, addressList)
     try:
@@ -51,7 +61,7 @@ def get_balance(
             if not recursive:
                 print("Recursive with " + provider)
                 return get_balance(provider, addressList, True)
-            return [-1 for _ in range(len(addressList))]
+            return [(-1 for _ in range(len(addressList))), False]
 
         response = response.json()
         balance = switch(provider, response, addressList)
@@ -64,8 +74,8 @@ def get_balance(
 
 def switch(provider: str, json, addressList):
     """
-    Given the endfpoint provider, the json response, and the addresses, it try to find the balance of each address in the json response
-    @return the balance
+    Given the endpoint provider (see MULTIPLE_ADDRESS_ENDPOINT), the json response, and the addresses list, it try to find the balance of each address in the json response
+    @return the list of all balance and a bool to verify if there are some balance greater then zero.
     """
     balance = []
     found=False
@@ -93,17 +103,26 @@ def switch(provider: str, json, addressList):
 
     return [balance,found]
 
+
 def createWalletListFromZero(nAddress):
+    """
+    This allows to create a list with specified size where the elements are the pair (private_key,public_key)
+    @return a list with the pair 
+    """
     walletsList = []
     for _ in range(nAddress):
         walletData = generateWallet.fromZeroToAddress()
-        if type(walletData[1])==bytes:
+        if type(walletData[1])==bytes: #used to make sure that the output from  walletData is a list of string
             walletData[1]=walletData[1].decode()
         #[0]: private_key ; [1]: public address
         walletsList.append(walletData)
     return walletsList
 
+
 def task(provider: str):
+    """
+    The main of the script where generate the addresses, check the balance and if there is positive balance. If successful writes to a file the private key and the address
+    """
     global count
     nAddress=MULTIPLE_ADDRESS_ENDPOINT.get(provider)[1]
     while True:
@@ -113,7 +132,8 @@ def task(provider: str):
         balanceList = get_balance(provider, addressList)
 
         if balanceList[1]:
-            for i, balance in enumerate(balanceList[0]):
+            print(balanceList)
+            for i, balance in enumerate(balanceList[0]): #int 116
                 if balance != -1 and balance != 0.00000000000000000:
                     print(walletsList[i])
                     with open("found_with_multiple_addresses.csv", "a") as f:
@@ -128,22 +148,30 @@ def task(provider: str):
         with threadLock:
             count += nAddress
         
+
 def restart():
+    """
+    It restart the script.
+    Function used before to solve memory leak.
+    """
     print("RESTART")
     if sys.platform=="Linux": #Change if you have different PATH
         os.execv("/usr/bin/python3",["python3"]+["/home/ubuntu/bruteforce-wallet-balance/multithreading_multiple_address.py"])
-
     os.execv(sys.executable, ['python'] + sys.argv)
 
 
-nThread = 3
+
+#---------------------------MODIFY----------------------------------
+
+nThread = 3 #Here, you can set how many endpoint check. Value higher then size of MULTIPLE_ADDRESS_ENDPOINT items does nothing. Example: You can specify it with 1 to check at the same time two endpoint.
+#-------------------------------------------------------------------
+
 pathCertificate = certifi.where()
-count = 0
+count = 0 #sum of addresses checked
 threadLock = threading.Lock()
 start = time.time()
 time.sleep(1)
 tracemalloc.start()
-
 
 for i, threadNumber in enumerate(MULTIPLE_ADDRESS_ENDPOINT.items()):
     if i == nThread:
@@ -163,19 +191,20 @@ for i, threadNumber in enumerate(MULTIPLE_ADDRESS_ENDPOINT.items()):
     )
     thread.start()
 
-print("\n")
 while True:
     print("Processed " + str(count)+" addresses")
     partial = time.time()
     print("Elapsed " + str(int(partial - start)) + " seconds from start")
     print("Mean address checked in one second: " + str(round(count / (partial - start),1)))
     print("Current memory usage (in MB):",str(round(tracemalloc.get_traced_memory()[0]/1024/1024,2)))
+    print()
+    time.sleep(60)
+
     #Used with old method to solve RAM leak
     #if tracemalloc.get_traced_memory()[0]>350*1024*1024:
     #    print("Memory usage exceeded 350MB")
     #    restart()
-    print()
-    time.sleep(60)
+    
 
 
 
