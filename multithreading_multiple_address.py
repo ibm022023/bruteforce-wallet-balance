@@ -61,7 +61,7 @@ def get_balance(
             if not recursive:
                 print("Recursive with " + provider)
                 return get_balance(provider, addressList, True)
-            return [(-1 for _ in range(len(addressList))), False]
+            return [0, False]
 
         response = response.json()
         balance = switch(provider, response, addressList)
@@ -130,7 +130,6 @@ def task(provider: str):
         walletsList=createWalletListFromZero(nAddress)
         addressList = [wallet[1] for wallet in walletsList]
         balanceList = get_balance(provider, addressList)
-
         if balanceList[1]:
             print(balanceList)
             for i, balance in enumerate(balanceList[0]): #int 116
