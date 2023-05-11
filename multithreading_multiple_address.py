@@ -69,7 +69,7 @@ def get_balance(
 
     except Exception as e:
         print("Exception on get_balance with " + provider + ": ", e)
-        return [-1 for _ in range(len(addressList))]
+        return [0, False]
 
 
 def switch(provider: str, json, addressList):
